@@ -19,5 +19,5 @@ public interface UserMapper {
 	public int addUser(User newUser);
 	
 	@Update("UPDATE USERS SET PASSWORD = ${newPassword} WHERE USERID = #{id}")
-	public User changePassword(int id, String newPassword);
+	public User changePassword(Integer id, String newPassword);
 }
