@@ -8,17 +8,17 @@ public class Files {
 	private String filename;
 	private String contentType;
 	private String filesize;
-	private Blob filedata;
+	private byte[] filedata;
 	private Integer userId;
 
-	public Files(int id, String filename, String contentType, String filesize, Blob filedata, int userId) {
-		this.id = id;
-		this.filename = filename;
-		this.contentType = contentType;
-		this.filesize = filesize;
-		this.filedata = filedata;
-		this.userId = userId;
-	}
+//	public Files(int id, String filename, String contentType, String filesize, Blob filedata, int userId) {
+//		this.id = id;
+//		this.filename = filename;
+//		this.contentType = contentType;
+//		this.filesize = filesize;
+//		this.filedata = filedata;
+//		this.userId = userId;
+//	}
 	
 	//getters and setters
 	
@@ -38,7 +38,7 @@ public class Files {
 		return this.filesize;
 	}
 	
-	public Blob getFiledata() {
+	public byte[] getFiledata() {
 		return this.filedata;
 	}
 	
@@ -62,7 +62,7 @@ public class Files {
 		this.filesize = filesize;
 	}
 	
-	public void setFiledata(Blob filedata) {
+	public void setFiledata(byte[] filedata) {
 		this.filedata = filedata;
 	}
 	

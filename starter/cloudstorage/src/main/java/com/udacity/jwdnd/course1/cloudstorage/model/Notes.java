@@ -8,12 +8,12 @@ public class Notes {
 	private String description;
 	private Integer userId;
 	
-	public Notes(Integer id, String title, String description, Integer userId) {
-		this.id = id;
-		this.title = title;
-		this.description = description;
-		this.userId = userId;
-	}
+//	public Notes(Integer id, String title, String description, Integer userId) {
+//		this.id = id;
+//		this.title = title;
+//		this.description = description;
+//		this.userId = userId;
+//	}
 	
 	//getters and setters
 	

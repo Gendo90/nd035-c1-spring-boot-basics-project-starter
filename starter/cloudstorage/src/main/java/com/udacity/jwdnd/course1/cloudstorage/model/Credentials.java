@@ -10,14 +10,14 @@ public class Credentials {
 	private String password;
 	private Integer userId;
 	
-	public Credentials(int id, String url, String username, String key, String password, int userId) {
-		this.id = id;
-		this.url = url;
-		this.username = username;
-		this.key = key;
-		this.password = password;
-		this.userId = userId;
-	}
+//	public Credentials(int id, String url, String username, String key, String password, int userId) {
+//		this.id = id;
+//		this.url = url;
+//		this.username = username;
+//		this.key = key;
+//		this.password = password;
+//		this.userId = userId;
+//	}
 	
 	//getters and setters
 	
