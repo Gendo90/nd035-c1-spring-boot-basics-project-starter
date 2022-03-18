@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -49,6 +50,15 @@ public class HomeController {
 		User currUser = userService.getUser(principal.getName());
 		System.out.println("The user returned is: " + currUser);
 		noteService.addNote(currUser.getUserId(), note);
+        return "redirect:/home";
+    }
+	
+	@GetMapping("/deleteNote/{noteId}")
+    public String deleteNote(Principal principal, Model model, @PathVariable int noteId) {
+		System.out.println(principal.getName());
+		User currUser = userService.getUser(principal.getName());
+		System.out.println("The user returned is: " + currUser);
+		noteService.deleteNote(currUser.getUserId(), noteId);
         return "redirect:/home";
     }
 	

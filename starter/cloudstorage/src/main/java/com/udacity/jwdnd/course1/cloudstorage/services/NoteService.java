@@ -21,10 +21,15 @@ public class NoteService {
     public int addNote(int userId, Notes note) {
     	note.setUserId(userId);
     	
-    	System.out.println(note.getTitle());
-    	System.out.println(note.getDescription());
-    	
     	return this.notesMapper.addNote(note);
+    }
+    
+    public void deleteNote(int userId, int noteId) {
+    	if(notesMapper.getNoteById(noteId).getUserId() != userId) {
+    		System.out.println("Not the current user's note to delete!");
+    	}
+    	
+    	notesMapper.deleteNote(noteId);
     }
     
     public List<Notes> getUserNotes(int userId) {

@@ -18,9 +18,18 @@ public interface NotesMapper {
 	@Select("SELECT * FROM NOTES WHERE USERID = #{userId}")
 	@Results({
         @Result(property = "title", column = "notetitle"),
-        @Result(property = "description", column = "notedescription")
+        @Result(property = "description", column = "notedescription"),
+        @Result(property = "id", column = "noteid")
     })
 	public List<Notes> getNotesByUser(Integer userId);
+	
+	@Select("SELECT * FROM NOTES WHERE NOTEID = #{noteId}")
+	@Results({
+        @Result(property = "title", column = "notetitle"),
+        @Result(property = "description", column = "notedescription"),
+        @Result(property = "id", column = "noteid")
+    })
+	public Notes getNoteById(Integer noteId);
 	
 	@Insert("INSERT INTO NOTES (notetitle, notedescription, userid) VALUES(#{title}, #{description}, #{userId})")
 	@Options(useGeneratedKeys = true, keyProperty = "id")
