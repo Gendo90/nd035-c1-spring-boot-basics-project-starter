@@ -1,6 +1,7 @@
 package com.udacity.jwdnd.course1.cloudstorage.controllers;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,7 +32,14 @@ public class HomeController {
     }
 	
 	@GetMapping("/home")
-    public String homeView() {
+    public String homeView(Principal principal, Model model) {
+		User currUser = userService.getUser(principal.getName());
+		System.out.println("The user returned for home is: " + currUser);
+		
+		List<Notes> currUserNotes = noteService.getUserNotes(currUser.getUserId());
+		System.out.println("Number of notes: " + currUserNotes.size());
+		if(currUserNotes.size() > 0) System.out.println(currUserNotes.get(0).getTitle());
+		model.addAttribute("userNotes", currUserNotes);
         return "home";
     }
 	
@@ -41,7 +49,7 @@ public class HomeController {
 		User currUser = userService.getUser(principal.getName());
 		System.out.println("The user returned is: " + currUser);
 		noteService.addNote(currUser.getUserId(), note);
-        return "home";
+        return "redirect:/home";
     }
 	
 	@PostMapping("/addCredential")
@@ -50,6 +58,6 @@ public class HomeController {
 		User currUser = userService.getUser(principal.getName());
 		System.out.println("The user returned is: " + currUser);
 		credentialService.addCredential(currUser.getUserId(), credential);
-        return "home";
+        return "redirect:/home";
     }
 }
