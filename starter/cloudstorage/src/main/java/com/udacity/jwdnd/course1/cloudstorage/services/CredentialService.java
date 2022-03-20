@@ -23,7 +23,17 @@ public class CredentialService {
     public int addCredential(int userId, Credentials credential) {
     	credential.setUserId(userId);
     	
-    	return this.credentialsMapper.addCredential(credential);
+    	return credentialsMapper.addCredential(credential);
+    }
+    
+    public void deleteCredential(int userId, int credentialId) {
+    	if(credentialsMapper.getCredentialById(credentialId).getUserId() != userId) {
+    		System.out.println("Not the current user's credential to delete!");
+    	}
+    	else {
+    		System.out.println("Note deleted successfully!");
+    		credentialsMapper.deleteCredential(credentialId);
+    	}
     }
     
     public List<Credentials> getUserCredentials(int userId) {

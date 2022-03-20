@@ -80,13 +80,23 @@ public class HomeController {
     }
 	
 	
-	// NOTE: Need to hash password upon adding it to the database, and use 
+	// NOTE: Need to encrypt password upon adding it to the database - see work TODO
 	@PostMapping("/addCredential")
     public String addCredential(Principal principal, Credentials credential, Model model, RedirectAttributes redirectAttrs) {
 		System.out.println(principal.getName());
 		User currUser = userService.getUser(principal.getName());
 		System.out.println("The user returned is: " + currUser);
 		credentialService.addCredential(currUser.getUserId(), credential);
+		redirectAttrs.addAttribute("currTab", "credentialTab");
+        return "redirect:/home";
+    }
+	
+	@GetMapping("/deleteCredential/{credentialId}")
+    public String deleteCredential(Principal principal, Model model, @PathVariable int credentialId, RedirectAttributes redirectAttrs) {
+		System.out.println(principal.getName());
+		User currUser = userService.getUser(principal.getName());
+		System.out.println("The user returned is: " + currUser);
+		credentialService.deleteCredential(currUser.getUserId(), credentialId);
 		redirectAttrs.addAttribute("currTab", "credentialTab");
         return "redirect:/home";
     }
