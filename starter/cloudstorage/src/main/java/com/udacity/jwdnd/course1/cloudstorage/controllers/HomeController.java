@@ -43,6 +43,15 @@ public class HomeController {
 		System.out.println("Number of notes: " + currUserNotes.size());
 		if(currUserNotes.size() > 0) System.out.println(currUserNotes.get(0).getTitle());
 		model.addAttribute("userNotes", currUserNotes);
+		
+		List<Credentials> currUserCredentials = credentialService.getUserCredentials(currUser.getUserId());
+		System.out.println("Number of credentials: " + currUserCredentials.size());
+		if(currUserCredentials.size() > 0) System.out.println(currUserCredentials.get(0).getUrl());
+		model.addAttribute("userCredentials", currUserCredentials);
+		
+		// REPEAT THE ABOVE for files for a specific user
+		
+		
 		if(currTab == null) {
 			currTab = "fileTab";
 		}
@@ -70,6 +79,8 @@ public class HomeController {
         return "redirect:/home";
     }
 	
+	
+	// NOTE: Need to hash password upon adding it to the database, and use 
 	@PostMapping("/addCredential")
     public String addCredential(Principal principal, Credentials credential, Model model, RedirectAttributes redirectAttrs) {
 		System.out.println(principal.getName());

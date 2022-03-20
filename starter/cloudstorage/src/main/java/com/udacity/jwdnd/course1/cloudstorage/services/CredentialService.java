@@ -1,5 +1,7 @@
 package com.udacity.jwdnd.course1.cloudstorage.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.udacity.jwdnd.course1.cloudstorage.mapper.UserMapper;
@@ -22,5 +24,9 @@ public class CredentialService {
     	credential.setUserId(userId);
     	
     	return this.credentialsMapper.addCredential(credential);
+    }
+    
+    public List<Credentials> getUserCredentials(int userId) {
+    	return credentialsMapper.getCredentialsByUser(userId);
     }
 }
