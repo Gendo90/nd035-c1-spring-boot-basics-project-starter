@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -71,6 +74,9 @@ public class HomeController {
 	
 	@PostMapping("/addFile")
     public String addFile(Principal principal, MultipartFile uploadFile, Model model, RedirectAttributes redirectAttrs) throws IOException {
+		// Do not allow uploads with empty files
+		if(uploadFile.getSize() == 0) return "redirect:/home";
+		
 		System.out.println(principal.getName());
 		User currUser = userService.getUser(principal.getName());
 		System.out.println("The user returned is: " + currUser);
@@ -84,6 +90,23 @@ public class HomeController {
 		fileService.addFile(currUser.getUserId(), storedFile);
 		redirectAttrs.addAttribute("currTab", "fileTab");
         return "redirect:/home";
+    }
+	
+	@GetMapping("/downloadFile/{fileId}")
+    public ResponseEntity<byte[]> downloadFile(Principal principal, Model model, @PathVariable int fileId, RedirectAttributes redirectAttrs) {
+		System.out.println(principal.getName());
+		User currUser = userService.getUser(principal.getName());
+		System.out.println("The user returned is: " + currUser);
+		Files result = fileService.getFile(currUser.getUserId(), fileId);
+//		redirectAttrs.addAttribute("currTab", "fileTab");
+//        return "redirect:/home";
+//		return result;
+		if(result == null) {
+			return new ResponseEntity(HttpHeaders.EMPTY, HttpStatus.NOT_FOUND);
+		}
+		System.out.println(result.getFilename());
+		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+				"attachment; filename=\"" + result.getFilename() + "\"").body(result.getFiledata());
     }
 	
 	@GetMapping("/deleteFile/{fileId}")

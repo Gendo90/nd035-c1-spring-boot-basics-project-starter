@@ -24,15 +24,26 @@ public class FileService {
     
     public void deleteFile(int userId, int fileId) {
     	if(filesMapper.getFileById(fileId).getUserId() != userId) {
-    		System.out.println("Not the current user's note to delete!");
+    		System.out.println("Not the current user's file to delete!");
     	}
     	else {
-    		System.out.println("Note deleted successfully!");
     		filesMapper.deleteFile(fileId);
+    		System.out.println("File deleted successfully!");
     	}
     }
     
     public List<Files> getUserFiles(int userId) {
     	return filesMapper.getFilesByUser(userId);
+    }
+    
+    public Files getFile(int userId, int fileId) {
+    	Files currFile = filesMapper.getFileById(fileId); 
+    	if(currFile.getUserId() != userId) {
+    		System.out.println("Not the current user's file to download!");
+    		return null;
+    	}
+    	else {
+    		return currFile;
+    	}
     }
 }

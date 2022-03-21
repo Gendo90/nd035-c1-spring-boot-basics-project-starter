@@ -8,7 +8,6 @@ import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
-import java.sql.Blob;
 import java.util.List;
 
 import com.udacity.jwdnd.course1.cloudstorage.model.Files;
