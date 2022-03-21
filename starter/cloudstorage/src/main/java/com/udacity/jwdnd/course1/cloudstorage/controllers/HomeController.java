@@ -86,6 +86,16 @@ public class HomeController {
         return "redirect:/home";
     }
 	
+	@GetMapping("/deleteFile/{fileId}")
+    public String deleteFile(Principal principal, Model model, @PathVariable int fileId, RedirectAttributes redirectAttrs) {
+		System.out.println(principal.getName());
+		User currUser = userService.getUser(principal.getName());
+		System.out.println("The user returned is: " + currUser);
+		fileService.deleteFile(currUser.getUserId(), fileId);
+		redirectAttrs.addAttribute("currTab", "fileTab");
+        return "redirect:/home";
+    }
+	
 	@PostMapping("/addNote")
     public String addNote(Principal principal, Notes note, Model model, RedirectAttributes redirectAttrs) {
 		System.out.println(principal.getName());
