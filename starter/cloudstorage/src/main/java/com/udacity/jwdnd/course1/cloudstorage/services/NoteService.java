@@ -24,6 +24,19 @@ public class NoteService {
     	return this.notesMapper.addNote(note);
     }
     
+    public void updateNote(int userId, Notes note) {
+    	int noteId = note.getId();
+    	if(notesMapper.getNoteById(noteId).getUserId() != userId) {
+    		System.out.println("Not the current user's note to update!");
+    	}
+    	else {
+    		
+    		notesMapper.changeNoteTitle(noteId, note.getTitle());
+    		notesMapper.changeNoteDescription(noteId, note.getDescription());
+    		System.out.println("Note updated successfully!");
+    	}
+    }
+    
     public void deleteNote(int userId, int noteId) {
     	if(notesMapper.getNoteById(noteId).getUserId() != userId) {
     		System.out.println("Not the current user's note to delete!");

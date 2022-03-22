@@ -92,7 +92,7 @@
                                     </tr>
                                     <tr th:each="note: ${userNotes}">
                                         <td>
-                                            <button type="button" class="btn btn-success">Edit</button>
+                                            <button type="button" class="btn btn-success" th:attr="onclick=|showNoteModal('${note.id}', '${note.title}', '${note.description}')|" >Edit</button>
                                             <a class="btn btn-danger" th:href="@{/deleteNote/{id}(id=${note.id})}">Delete</a>
                                         </td>
                                         <th scope="row" th:text="${note.title}">Example Note Title</th>
@@ -112,8 +112,8 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="#" th:action="@{'/addNote'}" method="POST">
-                                            <!-- <input type="hidden" name="id" id="note-id"> -->
+                                        <form action="#" id="noteModalForm" th:action="@{'/addNote'}" method="POST">
+                                            <input type="hidden" name="id" id="note-id">
                                             <div class="form-group">
                                                 <label for="note-title" class="col-form-label">Title</label>
                                                 <input type="text" name= "title" class="form-control" id="note-title" maxlength="20" required>
@@ -215,12 +215,20 @@
         <script th:src="@{/js/bootstrap.min.js}"></script>
 
         <!--For opening the note modal-->
-        <script type="text/javascript">
+        <script th:inline="javascript">
             // For opening the note modal
+            let addNoteAction = /*[[@{/addNote}]]*/ "/addNote";
+            let updateNoteAction = /*[[@{/updateNote}]]*/ "/updateNote";
             function showNoteModal(noteId, noteTitle, noteDescription) {
-                $('#note-id').val(noteId ? noteId : '');
+                $('#note-id').val(noteId ? noteId : 0);
                 $('#note-title').val(noteTitle ? noteTitle : '');
                 $('#note-description').val(noteDescription ? noteDescription : '');
+                if(noteId) {
+                    $('#noteModalForm').attr("action", updateNoteAction);
+                }
+                else {
+                    $('#noteModalForm').attr("action",  addNoteAction);
+                }
                 $('#noteModal').modal('show');
             }
 

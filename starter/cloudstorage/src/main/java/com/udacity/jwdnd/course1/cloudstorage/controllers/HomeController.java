@@ -129,6 +129,16 @@ public class HomeController {
         return "redirect:/home";
     }
 	
+	@PostMapping("/updateNote")
+    public String updateNote(Principal principal, Notes note, Model model, RedirectAttributes redirectAttrs) {
+		System.out.println(principal.getName());
+		User currUser = userService.getUser(principal.getName());
+		System.out.println("The user returned is: " + currUser);
+		noteService.updateNote(currUser.getUserId(), note);
+		redirectAttrs.addAttribute("currTab", "noteTab");
+        return "redirect:/home";
+    }
+	
 	@GetMapping("/deleteNote/{noteId}")
     public String deleteNote(Principal principal, Model model, @PathVariable int noteId, RedirectAttributes redirectAttrs) {
 		System.out.println(principal.getName());

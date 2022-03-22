@@ -35,11 +35,11 @@ public interface NotesMapper {
 	@Options(useGeneratedKeys = true, keyProperty = "id")
 	public int addNote(Notes newNote);
 	
-	@Update("UPDATE NOTES SET NOTETITLE = ${newTitle} WHERE NOTEID = #{id}")
-	public Notes changeNoteTitle(Integer id, String newTitle);
+	@Update("UPDATE NOTES SET NOTETITLE = '${newTitle}' WHERE NOTEID = #{id}")
+	public void changeNoteTitle(Integer id, String newTitle);
 	
-	@Update("UPDATE NOTES SET NOTEDESCRIPTION = ${newDescription} WHERE NOTEID = #{id}")
-	public Notes changeNoteDescription(Integer id, String newDescription);
+	@Update("UPDATE NOTES SET NOTEDESCRIPTION = '${newDescription}' WHERE NOTEID = #{id}")
+	public void changeNoteDescription(Integer id, String newDescription);
 	
 	@Delete("DELETE FROM NOTES WHERE NOTEID = #{noteId}")
 	public void deleteNote(Integer noteId);
