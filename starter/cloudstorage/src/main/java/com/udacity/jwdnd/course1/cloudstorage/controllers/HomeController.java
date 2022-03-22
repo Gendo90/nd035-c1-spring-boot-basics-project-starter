@@ -161,6 +161,16 @@ public class HomeController {
         return "redirect:/home";
     }
 	
+	@PostMapping("/updateCredential")
+    public String updateCredential(Principal principal, Credentials credential, Model model, RedirectAttributes redirectAttrs) {
+		System.out.println(principal.getName());
+		User currUser = userService.getUser(principal.getName());
+		System.out.println("The user returned is: " + currUser);
+		credentialService.updateCredential(currUser.getUserId(), credential);
+		redirectAttrs.addAttribute("currTab", "credentialTab");
+        return "redirect:/home";
+    }
+	
 	@GetMapping("/deleteCredential/{credentialId}")
     public String deleteCredential(Principal principal, Model model, @PathVariable int credentialId, RedirectAttributes redirectAttrs) {
 		System.out.println(principal.getName());

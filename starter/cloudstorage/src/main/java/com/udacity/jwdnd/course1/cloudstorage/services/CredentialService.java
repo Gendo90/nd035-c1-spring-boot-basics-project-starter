@@ -26,6 +26,19 @@ public class CredentialService {
     	return credentialsMapper.addCredential(credential);
     }
     
+    public void updateCredential(int userId, Credentials credential) {
+    	int credentialId = credential.getId();
+    	if(credentialsMapper.getCredentialById(credentialId).getUserId() != userId) {
+    		System.out.println("Not the current user's credential to update!");
+    	}
+    	else {
+    		
+    		credentialsMapper.changeUsername(credentialId, credential.getUsername());
+    		credentialsMapper.changePassword(credentialId, credential.getPassword());
+    		System.out.println("Credential updated successfully!");
+    	}
+    }
+    
     public void deleteCredential(int userId, int credentialId) {
     	if(credentialsMapper.getCredentialById(credentialId).getUserId() != userId) {
     		System.out.println("Not the current user's credential to delete!");

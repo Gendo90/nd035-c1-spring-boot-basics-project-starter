@@ -31,8 +31,11 @@ public interface CredentialsMapper {
 	@Options(useGeneratedKeys = true, keyProperty = "id")
 	public int addCredential(Credentials newCredential);
 	
-	@Update("UPDATE CREDENTIALS SET PASSWORD = ${newPassword} WHERE CREDENTIALID = #{id}")
-	public Credentials changePassword(Integer id, String newPassword);
+	@Update("UPDATE CREDENTIALS SET PASSWORD = '${newPassword}' WHERE CREDENTIALID = #{id}")
+	public void changePassword(Integer id, String newPassword);
+	
+	@Update("UPDATE CREDENTIALS SET USERNAME = '${newUsername}' WHERE CREDENTIALID = #{id}")
+	public void changeUsername(Integer id, String newUsername);
 	
 	@Delete("DELETE FROM CREDENTIALS WHERE CREDENTIALID = #{credentialId}")
 	public void deleteCredential(Integer credentialId);

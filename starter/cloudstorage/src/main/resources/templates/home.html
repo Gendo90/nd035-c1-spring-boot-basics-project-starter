@@ -92,7 +92,7 @@
                                     </tr>
                                     <tr th:each="note: ${userNotes}">
                                         <td>
-                                            <button type="button" class="btn btn-success" th:attr="onclick=|showNoteModal('${note.id}', '${note.title}', '${note.description}')|" >Edit</button>
+                                            <button type="button" class="btn btn-success" th:attr="onclick=|showNoteModal('${note.id}', '${note.title}', '${note.description}')|">Edit</button>
                                             <a class="btn btn-danger" th:href="@{/deleteNote/{id}(id=${note.id})}">Delete</a>
                                         </td>
                                         <th scope="row" th:text="${note.title}">Example Note Title</th>
@@ -160,7 +160,7 @@
                                 </tr>
                                 <tr th:each="credential: ${userCredentials}">
                                     <td>
-                                        <button type="button" class="btn btn-success">Edit</button>
+                                        <button type="button" class="btn btn-success" th:attr="onclick=|showCredentialModal('${credential.id}', '${credential.url}', '${credential.username}', '${credential.password}')|">Edit</button>
                                         <a class="btn btn-danger" th:href="@{/deleteCredential/{id}(id=${credential.id})}">Delete</a>
                                     </td>
                                     <th scope="row" th:text="${credential.url}">Example Credential URL</th>
@@ -181,8 +181,8 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="#" th:action="@{'/addCredential'}" method="POST">
-                                            <!-- <input type="hidden" name="credentialId" id="credential-id"> -->
+                                        <form id="credentialModalForm" action="#" th:action="@{'/addCredential'}" method="POST">
+                                            <input type="hidden" name="id" id="credential-id">
                                             <div class="form-group">
                                                 <label for="note-title" class="col-form-label">URL</label>
                                                 <input type="text" name= "url" class="form-control" id="credential-url" maxlength="100" required>
@@ -217,8 +217,8 @@
         <!--For opening the note modal-->
         <script th:inline="javascript">
             // For opening the note modal
-            let addNoteAction = /*[[@{/addNote}]]*/ "/addNote";
-            let updateNoteAction = /*[[@{/updateNote}]]*/ "/updateNote";
+            const addNoteAction = /*[[@{/addNote}]]*/ "/addNote";
+            const updateNoteAction = /*[[@{/updateNote}]]*/ "/updateNote";
             function showNoteModal(noteId, noteTitle, noteDescription) {
                 $('#note-id').val(noteId ? noteId : 0);
                 $('#note-title').val(noteTitle ? noteTitle : '');
@@ -232,12 +232,20 @@
                 $('#noteModal').modal('show');
             }
 
+            const addCredentialAction = /*[[@{/addCredential}]]*/ "/addCredential";
+            const updateCredentialAction = /*[[@{/updateCredential}]]*/ "/updateCredential";
             // For opening the credentials modal
             function showCredentialModal(credentialId, url, username, password) {
-                $('#credential-id').val(credentialId ? credentialId : '');
+                $('#credential-id').val(credentialId ? credentialId : 0);
                 $('#credential-url').val(url ? url : '');
                 $('#credential-username').val(username ? username : '');
                 $('#credential-password').val(password ? password : '');
+                if(credentialId) {
+                    $('#credentialModalForm').attr("action", updateCredentialAction);
+                }
+                else {
+                    $('#credentialModalForm').attr("action",  addCredentialAction);
+                }
                 $('#credentialModal').modal('show');
             }
         </script>
