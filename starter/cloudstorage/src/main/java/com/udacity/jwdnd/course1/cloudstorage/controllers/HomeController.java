@@ -208,8 +208,21 @@ public class HomeController {
 		System.out.println(principal.getName());
 		User currUser = userService.getUser(principal.getName());
 		System.out.println("The user returned is: " + currUser);
-		credentialService.updateCredential(currUser.getUserId(), credential);
+		
 		redirectAttrs.addAttribute("currTab", "credentialTab");
+		
+		Credentials modCredential = credentialService.getCredential(currUser.getUserId(), credential.getId());
+		if(modCredential == null) {
+			return "redirect:/home";
+		}
+		//Encrypt password here - since it can only be changed by the user when decrypted!
+		String encryptedPassword = encryptionService.encryptValue(credential.getPassword(), modCredential.getKey());
+		modCredential.setPassword(encryptedPassword);
+		modCredential.setUsername(credential.getUsername());
+		
+		
+		//Service checks if the credential can be updated for this user
+		credentialService.updateCredential(currUser.getUserId(), modCredential);
         return "redirect:/home";
     }
 	
