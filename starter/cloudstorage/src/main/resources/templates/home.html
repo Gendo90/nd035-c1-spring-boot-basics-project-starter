@@ -6,6 +6,11 @@
 
         <link rel="stylesheet" type="text/css" media="all" th:href="@{/css/bootstrap.min.css}">
 
+        <style>
+          .alert {text-align: center; width: 300px; position: fixed; bottom: 10px; left: calc(50% - 150px);}
+          .alertMsg {text-align: center; position: relative; width: 100%;}
+        </style>
+
         <title>Home</title>
     </head>
     <body class="p-3 mb-2 bg-light text-black">
@@ -214,6 +219,16 @@
             </div>
         </div>
 
+        <!-- Alerts - stick to bottom -->
+        <!-- Success -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+          <span class="alertMsg" th:text="${success}">This is a success alert for successful actions!</span>
+        </div>
+        <!-- Error -->
+        <div th:if="${error}" th:text="${error}" class="alert alert-warning alert-dismissible fade show" role="alert">
+          <span class="alertMsg" th:text="${error}">This is an error alert for problem actions!</span>
+        </div>
+
         <script th:src="@{/js/jquery-slim.min.js}"></script>
         <script th:src="@{/js/popper.min.js}"></script>
         <script th:src="@{/js/bootstrap.min.js}"></script>
@@ -252,6 +267,7 @@
                 }
                 $('#credentialModal').modal('show');
             }
+
             /*<![CDATA[*/
             const currCredentialData = /*[[${currCredential}]]*/ null;
 
@@ -262,6 +278,11 @@
                 showCredentialModal(currCredentialData.id, currCredentialData.url, currCredentialData.username, currCredentialData.password);
             }
             /*]]>*/
+
+            if($('.alert')) {
+                $('.alert').alert()
+                setTimeout(() => $('.alert').alert('close'), 2500);
+            }
         </script>
     </body>
 </html>

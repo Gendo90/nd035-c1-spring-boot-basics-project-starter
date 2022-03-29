@@ -51,7 +51,8 @@ public class HomeController {
 	
 	@GetMapping("/home")
     public String homeView(Principal principal, Model model, @RequestParam(required = false) String currTab, 
-    		@RequestParam(defaultValue = "0") String credentialId, RedirectAttributes redirectAttrs) {
+    		@RequestParam(defaultValue = "0") String credentialId, @RequestParam(required = false) String success,
+    		@RequestParam(required = false) String error, RedirectAttributes redirectAttrs) {
 		User currUser = userService.getUser(principal.getName());
 		System.out.println("The user returned for home is: " + currUser);
 		int userId = currUser.getUserId();
@@ -83,6 +84,13 @@ public class HomeController {
 			Credentials currCredential = getDecryptedPasswordCredential(currUser.getUserId(), credentialIdInt);
 			if(currCredential != null) model.addAttribute("currCredential", currCredential);
 			if(currCredential != null) System.out.println("The decrypted password for home is: " + currCredential.getPassword());
+		}
+		
+		if(success != null) {
+			model.addAttribute("success", success);
+		}
+		else if(error != null) {
+			model.addAttribute("error", error);
 		}
 		
         return "home";
@@ -142,6 +150,8 @@ public class HomeController {
 		System.out.println("The user returned is: " + currUser);
 		noteService.addNote(currUser.getUserId(), note);
 		redirectAttrs.addAttribute("currTab", "noteTab");
+		
+		redirectAttrs.addAttribute("success", "Note created successfully!");
         return "redirect:/home";
     }
 	
