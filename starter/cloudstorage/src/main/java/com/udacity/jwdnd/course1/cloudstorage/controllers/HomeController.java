@@ -11,18 +11,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.udacity.jwdnd.course1.cloudstorage.model.Credentials;
 import com.udacity.jwdnd.course1.cloudstorage.model.Files;
 import com.udacity.jwdnd.course1.cloudstorage.model.Notes;
 import com.udacity.jwdnd.course1.cloudstorage.model.User;
 import com.udacity.jwdnd.course1.cloudstorage.services.CredentialService;
+import com.udacity.jwdnd.course1.cloudstorage.services.EncryptionService;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
 import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
@@ -36,16 +39,19 @@ public class HomeController {
 	private final NoteService noteService;
 	private final CredentialService credentialService;
 	private final UserService userService;
+	private final EncryptionService encryptionService;
 	
-	public HomeController(UserService userService, FileService fileService, NoteService noteService, CredentialService credentialService) {
+	public HomeController(UserService userService, EncryptionService encryptionService, FileService fileService, NoteService noteService, CredentialService credentialService) {
         this.userService = userService;
+        this.encryptionService = encryptionService;
         this.fileService = fileService;
         this.noteService = noteService;
         this.credentialService = credentialService;
     }
 	
 	@GetMapping("/home")
-    public String homeView(Principal principal, Model model, @RequestParam(required = false) String currTab) {
+    public String homeView(Principal principal, Model model, @RequestParam(required = false) String currTab, 
+    		@RequestParam(defaultValue = "0") String credentialId, RedirectAttributes redirectAttrs) {
 		User currUser = userService.getUser(principal.getName());
 		System.out.println("The user returned for home is: " + currUser);
 		int userId = currUser.getUserId();
@@ -69,6 +75,16 @@ public class HomeController {
 			currTab = "fileTab";
 		}
 		model.addAttribute("currTab", currTab);
+		
+		System.out.println("The credentialId is " + credentialId);
+		
+		Integer credentialIdInt = Integer.parseInt(credentialId);
+		if(credentialIdInt > 0) {
+			Credentials currCredential = getDecryptedPasswordCredential(currUser.getUserId(), credentialIdInt);
+			if(currCredential != null) model.addAttribute("currCredential", currCredential);
+			if(currCredential != null) System.out.println("The decrypted password for home is: " + currCredential.getPassword());
+		}
+		
         return "home";
     }
 	
@@ -156,9 +172,35 @@ public class HomeController {
 		System.out.println(principal.getName());
 		User currUser = userService.getUser(principal.getName());
 		System.out.println("The user returned is: " + currUser);
+		
+		credential.setKey(encryptionService.generateRandomKey());
+		credential.setPassword(encryptionService.encryptValue(credential.getPassword(), credential.getKey()));
+		
 		credentialService.addCredential(currUser.getUserId(), credential);
 		redirectAttrs.addAttribute("currTab", "credentialTab");
         return "redirect:/home";
+    }
+	
+	//passes through to home only if user can access that credential!
+	@GetMapping("/getCredential/{credentialId}")
+    public String getCredential(Principal principal, @PathVariable Integer credentialId, Model model, RedirectAttributes redirectAttrs) {
+		System.out.println(principal.getName());
+		User currUser = userService.getUser(principal.getName());
+		System.out.println("The user returned is: " + currUser);
+		
+		redirectAttrs.addAttribute("currTab", "credentialTab");
+		
+		Credentials currCredential = getDecryptedPasswordCredential(currUser.getUserId(), credentialId);
+		
+		//Block here if the credential is not one of the user's!
+		if(currCredential == null) {
+			return "redirect:/home";
+		}
+		
+		redirectAttrs.addAttribute("credentialId", "" + credentialId);
+		System.out.println("credential id is: present");
+		
+		return "redirect:/home";
     }
 	
 	@PostMapping("/updateCredential")
@@ -180,4 +222,20 @@ public class HomeController {
 		redirectAttrs.addAttribute("currTab", "credentialTab");
         return "redirect:/home";
     }
+	
+	public Credentials getDecryptedPasswordCredential(int userId, int credentialId) {
+		Credentials currCredential = credentialService.getCredential(userId, credentialId);
+		if(currCredential == null) {
+			return null;
+		}
+		
+		
+		String encryptedPassword = currCredential.getPassword();
+		String key = currCredential.getKey();
+		
+		String decryptedPassword = encryptionService.decryptValue(encryptedPassword, key);
+		currCredential.setPassword(decryptedPassword);
+		
+		return currCredential;
+	}
 }

@@ -160,7 +160,11 @@
                                 </tr>
                                 <tr th:each="credential: ${userCredentials}">
                                     <td>
-                                        <button type="button" class="btn btn-success" th:attr="onclick=|showCredentialModal('${credential.id}', '${credential.url}', '${credential.username}', '${credential.password}')|">Edit</button>
+                                        <!-- th:attr="onclick=|showCredentialModal('${credential.id}', '${credential.url}', '${credential.username}', '${credential.password}')|" -->
+                                        <!-- th:href="@{/getCredential/{id}(id=${credential.id})}" -->
+                                        <!-- <button th:attr="onclick=|showCredentialModal('${credential.id}', '${credential.url}', '${credential.username}', '${credential.password}')|" class="btn btn-success">Edit</button> -->
+                                        <!-- <button th:attr="onclick=|$.post(''@{/getCredential/{id}(id=${credential.id})}'')|" class="btn btn-success">Edit</button> -->
+                                        <a th:href="@{/getCredential/{id}(id=${credential.id})}" class="btn btn-success">Edit</a>
                                         <a class="btn btn-danger" th:href="@{/deleteCredential/{id}(id=${credential.id})}">Delete</a>
                                     </td>
                                     <th scope="row" th:text="${credential.url}">Example Credential URL</th>
@@ -181,7 +185,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form id="credentialModalForm" action="#" th:action="@{'/addCredential'}" method="POST">
+                                        <form id="credentialModalForm" th:action="@{'/addCredential'}" method="POST">
                                             <input type="hidden" name="id" id="credential-id">
                                             <div class="form-group">
                                                 <label for="note-title" class="col-form-label">URL</label>
@@ -248,6 +252,16 @@
                 }
                 $('#credentialModal').modal('show');
             }
+            /*<![CDATA[*/
+            const currCredentialData = /*[[${currCredential}]]*/ null;
+
+            console.log(currCredentialData);
+
+            if(currCredentialData) {
+                console.log(currCredentialData);
+                showCredentialModal(currCredentialData.id, currCredentialData.url, currCredentialData.username, currCredentialData.password);
+            }
+            /*]]>*/
         </script>
     </body>
 </html>

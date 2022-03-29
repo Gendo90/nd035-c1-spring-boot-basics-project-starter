@@ -4,12 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.udacity.jwdnd.course1.cloudstorage.mapper.UserMapper;
-import com.udacity.jwdnd.course1.cloudstorage.model.User;
 import com.udacity.jwdnd.course1.cloudstorage.mapper.CredentialsMapper;
-import com.udacity.jwdnd.course1.cloudstorage.mapper.NotesMapper;
 import com.udacity.jwdnd.course1.cloudstorage.model.Credentials;
-import com.udacity.jwdnd.course1.cloudstorage.model.Notes;
 
 @Service
 public class CredentialService {
@@ -24,6 +20,18 @@ public class CredentialService {
     	credential.setUserId(userId);
     	
     	return credentialsMapper.addCredential(credential);
+    }
+    
+    public Credentials getCredential(int userId, int credentialId) {
+    	Credentials retrievedCredential = credentialsMapper.getCredentialById(credentialId);
+    	if(retrievedCredential.getUserId() != userId) {
+    		System.out.println("Not the current user's credential to retrieve!");
+    		
+    		return null;
+    	}
+    	else {    		
+    		return retrievedCredential;
+    	}
     }
     
     public void updateCredential(int userId, Credentials credential) {
