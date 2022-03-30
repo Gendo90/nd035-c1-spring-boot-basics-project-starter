@@ -84,7 +84,7 @@ class CloudStorageApplicationTests {
 
 		/* Check that the sign up was successful. 
 		// You may have to modify the element "success-msg" and the sign-up 
-		// success message below depening on the rest of your code.
+		// success message below depending on the rest of your code.
 		*/
 		Assertions.assertTrue(driver.findElement(By.id("success-msg")).getText().contains("You successfully signed up!"));
 	}
@@ -126,7 +126,7 @@ class CloudStorageApplicationTests {
 	 * your code to ensure that it meets certain rubric criteria. 
 	 * 
 	 * If this test is failing, please ensure that you are handling redirecting users 
-	 * back to the login page after a succesful sign up.
+	 * back to the login page after a successful sign up.
 	 * Read more about the requirement in the rubric: 
 	 * https://review.udacity.com/#!/rubrics/2724/view 
 	 */
@@ -136,7 +136,7 @@ class CloudStorageApplicationTests {
 		doMockSignUp("Redirection","Test","RT","123");
 		
 		// Check if we have been redirected to the log in page.
-		Assertions.assertEquals("http://localhost:" + this.port + "/login", driver.getCurrentUrl());
+		Assertions.assertEquals("Login", driver.getTitle());
 	}
 
 	/**

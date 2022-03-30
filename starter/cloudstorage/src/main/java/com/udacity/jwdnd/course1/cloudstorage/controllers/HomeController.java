@@ -113,6 +113,7 @@ public class HomeController {
 		
 		fileService.addFile(currUser.getUserId(), storedFile);
 		redirectAttrs.addAttribute("currTab", "fileTab");
+		redirectAttrs.addAttribute("success", "File uploaded successfully!");
         return "redirect:/home";
     }
 	
@@ -140,6 +141,7 @@ public class HomeController {
 		System.out.println("The user returned is: " + currUser);
 		fileService.deleteFile(currUser.getUserId(), fileId);
 		redirectAttrs.addAttribute("currTab", "fileTab");
+		redirectAttrs.addAttribute("success", "File removed successfully!");
         return "redirect:/home";
     }
 	
@@ -162,6 +164,7 @@ public class HomeController {
 		System.out.println("The user returned is: " + currUser);
 		noteService.updateNote(currUser.getUserId(), note);
 		redirectAttrs.addAttribute("currTab", "noteTab");
+		redirectAttrs.addAttribute("success", "Note updated successfully!");
         return "redirect:/home";
     }
 	
@@ -172,11 +175,11 @@ public class HomeController {
 		System.out.println("The user returned is: " + currUser);
 		noteService.deleteNote(currUser.getUserId(), noteId);
 		redirectAttrs.addAttribute("currTab", "noteTab");
+		redirectAttrs.addAttribute("success", "Note removed successfully!");
         return "redirect:/home";
     }
 	
 	
-	// NOTE: Need to encrypt password upon adding it to the database - see work TODO
 	@PostMapping("/addCredential")
     public String addCredential(Principal principal, Credentials credential, Model model, RedirectAttributes redirectAttrs) {
 		System.out.println(principal.getName());
@@ -188,6 +191,7 @@ public class HomeController {
 		
 		credentialService.addCredential(currUser.getUserId(), credential);
 		redirectAttrs.addAttribute("currTab", "credentialTab");
+		redirectAttrs.addAttribute("success", "Credential added successfully!");
         return "redirect:/home";
     }
 	
@@ -204,11 +208,11 @@ public class HomeController {
 		
 		//Block here if the credential is not one of the user's!
 		if(currCredential == null) {
+			redirectAttrs.addAttribute("error", "Something went wrong!");
 			return "redirect:/home";
 		}
 		
 		redirectAttrs.addAttribute("credentialId", "" + credentialId);
-		System.out.println("credential id is: present");
 		
 		return "redirect:/home";
     }
@@ -223,6 +227,7 @@ public class HomeController {
 		
 		Credentials modCredential = credentialService.getCredential(currUser.getUserId(), credential.getId());
 		if(modCredential == null) {
+			redirectAttrs.addAttribute("error", "Something went wrong!");
 			return "redirect:/home";
 		}
 		//Encrypt password here - since it can only be changed by the user when decrypted!
@@ -233,6 +238,7 @@ public class HomeController {
 		
 		//Service checks if the credential can be updated for this user
 		credentialService.updateCredential(currUser.getUserId(), modCredential);
+		redirectAttrs.addAttribute("success", "Credential updated successfully!");
         return "redirect:/home";
     }
 	
@@ -243,6 +249,7 @@ public class HomeController {
 		System.out.println("The user returned is: " + currUser);
 		credentialService.deleteCredential(currUser.getUserId(), credentialId);
 		redirectAttrs.addAttribute("currTab", "credentialTab");
+		redirectAttrs.addAttribute("success", "Credential removed successfully!");
         return "redirect:/home";
     }
 	
