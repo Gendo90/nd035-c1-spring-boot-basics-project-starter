@@ -16,8 +16,16 @@ public class FileService {
         this.filesMapper = filesMapper;
     }
 
+    // users cannot add multiple files with the same name (duplicate filenames)
     public int addFile(int userId, Files file) {
     	file.setUserId(userId);
+    	
+    	Files checkFilenameFile = filesMapper.getFileByUserIdAndFilename(userId, file.getFilename());
+    	
+    	if(checkFilenameFile != null) {
+    		System.out.println("Duplicate filenames for the same user not allowed!");
+    		return -1;
+    	}
     	
     	return filesMapper.addFile(file);
     }

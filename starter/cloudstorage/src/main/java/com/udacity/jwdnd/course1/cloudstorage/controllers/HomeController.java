@@ -98,6 +98,8 @@ public class HomeController {
 	
 	@PostMapping("/addFile")
     public String addFile(Principal principal, MultipartFile uploadFile, Model model, RedirectAttributes redirectAttrs) throws IOException {
+		redirectAttrs.addAttribute("currTab", "fileTab");
+		
 		// Do not allow uploads with empty files
 		if(uploadFile.getSize() == 0) return "redirect:/home";
 		
@@ -111,8 +113,13 @@ public class HomeController {
 		storedFile.setContentType(uploadFile.getContentType());
 		storedFile.setFilesize("" + uploadFile.getSize());
 		
-		fileService.addFile(currUser.getUserId(), storedFile);
-		redirectAttrs.addAttribute("currTab", "fileTab");
+		int result = fileService.addFile(currUser.getUserId(), storedFile);
+		// Duplicate filename condition
+		if(result < 0) {
+			redirectAttrs.addAttribute("error", "Duplicate filenames not allowed!");
+			return "redirect:/home";
+		}
+		
 		redirectAttrs.addAttribute("success", "File uploaded successfully!");
         return "redirect:/home";
     }

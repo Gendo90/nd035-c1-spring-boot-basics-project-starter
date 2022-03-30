@@ -26,6 +26,12 @@ public interface FilesMapper {
     })
 	public Files getFileById(Integer fileId);
 	
+	@Select("SELECT * FROM FILES WHERE FILENAME = #{filename} AND USERID = #{userId}")
+	@Results({
+        @Result(property = "id", column = "fileid")
+    })
+	public Files getFileByUserIdAndFilename(Integer userId, String filename);
+	
 	@Insert("INSERT INTO FILES (filename, contenttype, filesize, filedata, userid) VALUES(#{filename}, #{contentType}, #{filesize}, #{filedata}, #{userId})")
 	@Options(useGeneratedKeys = true, keyProperty = "id")
 	public int addFile(Files newFile);
