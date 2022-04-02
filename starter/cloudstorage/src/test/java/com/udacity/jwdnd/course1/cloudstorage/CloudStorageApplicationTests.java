@@ -10,18 +10,24 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
+import com.udacity.jwdnd.course1.cloudstorage.model.Credentials;
 import com.udacity.jwdnd.course1.cloudstorage.model.Notes;
 import com.udacity.jwdnd.course1.cloudstorage.model.User;
+import com.udacity.jwdnd.course1.cloudstorage.services.CredentialService;
+import com.udacity.jwdnd.course1.cloudstorage.services.EncryptionService;
 import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
 
 import java.io.File;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class CloudStorageApplicationTests {
 
 	@LocalServerPort
@@ -36,10 +42,19 @@ class CloudStorageApplicationTests {
 	private NoteService noteService;
 	
 	@Autowired
+	private CredentialService credentialService;
+	
+	@Autowired
+	private EncryptionService encryptionService;
+	
+	@Autowired
 	private User elmerFudd;
 	
 	@Autowired
 	private Notes existingNote;
+	
+	@Autowired
+	private Credentials existingCredential;
 
 	@BeforeAll
 	void beforeAll() {
@@ -58,7 +73,17 @@ class CloudStorageApplicationTests {
 		existingNote.setTitle("Buy New Outfit");
 		existingNote.setDescription("I need to buy more hunting clothes to get the wabbits. Maybe camouflage will work better than dwab bwown!");
 		
-		int existingNoteId = noteService.addNote(fuddId, existingNote);
+		noteService.addNote(fuddId, existingNote);
+		
+		// add an existing credential for the existing user
+		existingCredential.setUrl("www.gmail.com");
+		existingCredential.setUsername("WabbitMan");
+		existingCredential.setPassword("huhuhuhuhuh");
+		
+		existingCredential.setKey(encryptionService.generateRandomKey());
+		existingCredential.setPassword(encryptionService.encryptValue(existingCredential.getPassword(), existingCredential.getKey()));
+		
+		credentialService.addCredential(fuddId, existingCredential);
 	}
 
 	@BeforeEach
@@ -294,16 +319,24 @@ class CloudStorageApplicationTests {
 		WebElement saveNoteButton = driver.findElement(By.id("postNote"));
 		saveNoteButton.click();
 		
-		WebElement addedNoteTitle = driver.findElement(By.xpath("/html/body/div/div[2]/div/div[2]/div[1]/table/tbody/tr[3]/th"));
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("successToast")));
+		
+		// get number of rows in table now! Needed because the first element could be deleted before this
+		// is added, then the hardcoded xpath will be wrong!
+		int lastRowCount = driver.findElement(By.id("noteTable")).findElements(By.tagName("tr")).size()-1;
+		
+		WebElement addedNoteTitle = driver.findElement(By.id("noteTable")).findElement(By.xpath("tbody/tr[" + lastRowCount + "]/th"));
 		Assertions.assertEquals("Note Title Here", addedNoteTitle.getText());
 		
-		WebElement addedNoteDesc = driver.findElement(By.xpath("/html/body/div/div[2]/div/div[2]/div[1]/table/tbody/tr[3]/td[2]"));
+		WebElement addedNoteDesc = driver.findElement(By.id("noteTable")).findElement(By.xpath("tbody/tr[" + lastRowCount + "]/td[2]"));
 		Assertions.assertEquals("Note Description Here", addedNoteDesc.getText());
 	}
 	
 	// Test that the the user can sign up, login, access the home page,
 	// and navigate to the note tab and edit an existing note
+	// This test is executed before the delete note test so there is something to edit!
 	@Test
+	@Order(1)
 	public void testEditNote() {
 		doLogIn("WabbitHunter007", "W4bbits");
 		
@@ -350,9 +383,9 @@ class CloudStorageApplicationTests {
 		
 		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
 		
-		// Get the existing note's title and description - may be changed by testEditNote
-		// depending on the randomized test order, so not hard-coded here!
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("deleteNote1")));
+		// Get the existing note's title and description
+		int existingNoteId = existingNote.getId();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("deleteNote" + existingNoteId)));
 		
 		WebElement firstNoteTitle = driver.findElement(By.xpath("/html/body/div/div[2]/div/div[2]/div[1]/table/tbody/tr[2]/th"));
 		String existingNoteTitle = firstNoteTitle.getText();
@@ -361,13 +394,160 @@ class CloudStorageApplicationTests {
 		String existingNoteDesc = firstNoteDesc.getText();
 		
 		// delete the existing note (first note)
-		WebElement deleteNoteButton = driver.findElement(By.id("deleteNote1"));
+		WebElement deleteNoteButton = driver.findElement(By.id("deleteNote" + existingNoteId));
 		deleteNoteButton.click();
 		
 		// Check that the title and description are no longer on the page
-		webDriverWait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("deleteNote1")));
+		webDriverWait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("deleteNote" + existingNoteId)));
 
 		Assertions.assertFalse(driver.getPageSource().contains(existingNoteTitle) && driver.getPageSource().contains(existingNoteDesc));		
+	}
+	
+	// Test that the the user can sign up, login, access the home page,
+	// and navigate to the credential tab and add a new credential
+	@Test
+	public void testAddCredential() {
+		doLogIn("WabbitHunter007", "W4bbits");
+		
+		// add note
+		WebElement noteTab = driver.findElement(By.id("nav-credentials-tab"));
+		noteTab.click();
+		
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("addCredential")));
+		WebElement addNoteButton = driver.findElement(By.id("addCredential"));
+		addNoteButton.click();
+		
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-url")));
+		WebElement inputCredentialUrl = driver.findElement(By.id("credential-url"));
+		inputCredentialUrl.click();
+		inputCredentialUrl.sendKeys("Cred URL Here");
+		
+		WebElement inputCredentialUsername = driver.findElement(By.id("credential-username"));
+		inputCredentialUsername.click();
+		inputCredentialUsername.sendKeys("Cred Username");
+		
+		WebElement inputCredentialPassword = driver.findElement(By.id("credential-password"));
+		inputCredentialPassword.click();
+		inputCredentialPassword.sendKeys("Cred Password");
+		
+		WebElement saveCredentialButton = driver.findElement(By.id("postCredential"));
+		saveCredentialButton.click();
+		
+		// get number of rows in table now! Needed because the first element could be deleted before this
+		// is added, then the hardcoded xpath will be wrong!
+		WebElement credentialTable = driver.findElement(By.id("credentialTable"));
+		int lastRowCount = credentialTable.findElements(By.tagName("tr")).size() - 1;
+		
+		WebElement addedCredentialUrl = credentialTable.findElement(By.xpath("tbody/tr[" + lastRowCount + "]/th"));
+		Assertions.assertEquals("Cred URL Here", addedCredentialUrl.getText());
+		
+		WebElement addedCredentialUsername = credentialTable.findElement(By.xpath("tbody/tr[" + lastRowCount + "]/td[2]"));
+		Assertions.assertEquals("Cred Username", addedCredentialUsername.getText());
+		
+		// Check password text field against encrypted password in DB
+		WebElement addedCredentialPassword = credentialTable.findElement(By.xpath("tbody/tr[" + lastRowCount + "]/td[3]"));
+		String encryptedPassword = credentialService.getCredential(1, 2).getPassword();
+		Assertions.assertEquals(encryptedPassword, addedCredentialPassword.getText());
+	}
+	
+	// Test that the the user can sign up, login, access the home page,
+	// and navigate to the credential tab and edit an existing credential
+	@Test
+	@Order(2)
+	public void testEditCredential() {
+		doLogIn("WabbitHunter007", "W4bbits");
+		
+		// add note
+		WebElement noteTab = driver.findElement(By.id("nav-credentials-tab"));
+		noteTab.click();
+		
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialTable")));
+		WebElement credentialTable = driver.findElement(By.id("credentialTable"));
+		
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("addCredential")));
+		
+		// get number of rows in table now! This will always run before adding a new credential, so
+		// the existing credential is the last row! Row count will not change upon editing (in this test)
+		int lastRowCount = credentialTable.findElements(By.tagName("tr")).size() - 1;	
+				
+		// get initial encrypted password to check if it changes when edited
+		String initialEncryptedPassword = credentialTable.findElement(By.xpath("tbody/tr[" + lastRowCount + "]/td[3]")).getText();
+		
+		WebElement editCredentialButton = driver.findElement(By.id("editCredential1"));
+		editCredentialButton.click();
+		
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialModal")));
+		
+		// Credential URL not updateable due to design decision - a user would just add a new credential
+		// for different domain/account and would not change this value unless removing an account
+//		WebElement inputCredentialUrl = driver.findElement(By.id("credential-url"));
+//		inputCredentialUrl.click();
+//		inputCredentialUrl.clear();
+//		inputCredentialUrl.sendKeys("Edited Cred URL!");
+		
+		WebElement inputCredentialUsername = driver.findElement(By.id("credential-username"));
+		inputCredentialUsername.click();
+		inputCredentialUsername.clear();
+		inputCredentialUsername.sendKeys("Edited Cred Username!");
+		
+		WebElement inputCredentialPassword = driver.findElement(By.id("credential-password"));
+		inputCredentialPassword.click();
+		inputCredentialPassword.clear();
+		inputCredentialPassword.sendKeys("Edited Cred Password!");
+		
+		WebElement saveCredentialButton = driver.findElement(By.id("postCredential"));
+		saveCredentialButton.click();
+		
+		// refresh credentialTable webElement
+		credentialTable = driver.findElement(By.id("credentialTable"));
+		
+//		WebElement editedCredentialUrl = credentialTable.findElement(By.xpath("tbody/tr[" + lastRowCount + "]/th"));
+//		Assertions.assertEquals("Edited Cred URL!", editedCredentialUrl.getText());
+		
+		WebElement editedCredentialUsername = credentialTable.findElement(By.xpath("tbody/tr[" + lastRowCount + "]/td[2]"));
+		Assertions.assertEquals("Edited Cred Username!", editedCredentialUsername.getText());
+		
+		// check that new encrypted password is different from original encrypted password
+		WebElement addedCredentialPassword = credentialTable.findElement(By.xpath("tbody/tr[" + lastRowCount + "]/td[3]"));
+		Assertions.assertNotEquals(initialEncryptedPassword, addedCredentialPassword.getText());
+	}
+	
+	// Test that the the user can sign up, login, access the home page,
+	// and navigate to the credential tab and delete an existing credential
+	@Test
+	public void testDeleteCredential() {
+		doLogIn("WabbitHunter007", "W4bbits");
+		
+		// add note
+		WebElement noteTab = driver.findElement(By.id("nav-credentials-tab"));
+		noteTab.click();
+		
+		int existingCredentialId = existingCredential.getId();
+		
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialTable")));
+		
+		// assert existing credential is on webpage and can be deleted
+		WebElement deleteExistingCredentialButton = driver.findElement(By.id("deleteCredential" + existingCredentialId));
+		Assertions.assertNotNull(deleteExistingCredentialButton);
+		
+		// delete the existing credential
+		deleteExistingCredentialButton.click();
+		
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("successToast")));
+		
+		// check that the credential delete button is gone (credential has been deleted!)
+		// Selenium throws an error if true		
+		Assertions.assertThrows(NoSuchElementException.class,  
+				() -> {
+					driver.findElement(By.id("deleteCredential" + existingCredentialId));
+					}
+				);
 	}
 
 }

@@ -255,6 +255,8 @@ public class HomeController {
 			
 			Credentials currCredential = getDecryptedPasswordCredential(currUser.getUserId(), credentialId);
 			
+			System.out.println("The retrieved credential is: " + currCredential);
+			
 			//Block here if the credential is not one of the user's!
 			if(currCredential == null) {
 				redirectAttrs.addAttribute("error", "Something went wrong!");
